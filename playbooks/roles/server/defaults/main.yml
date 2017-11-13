@@ -1,0 +1,16 @@
+---
+required_core_packages:
+  - ufw
+  - fail2ban
+  - vim
+  - aptitude
+  - python3-mysqldb
+custom_ssh_port: &custom_ssh_port 3555
+allowed_firewall_ports:
+  - 22
+  - 80
+  - 443
+  - *custom_ssh_port
+deploy_user: &deploy_user deploy
+ssh_users:
+  - *deploy_user

@@ -1,0 +1,26 @@
+---
+- name: Add users
+  user:
+    name: "{{ item }}"
+    shell: /bin/bash
+    groups:
+      - "{{ deploy_user }}"
+      - sudo
+  with_items: "{{ ssh_users }}"
+  become: true
+
+- name: Add ssh keys
+  authorized_key:
+    user: "{{ item }}"
+    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  become: true
+  with_items: "{{ ssh_users }}"
+
+- name: Allow passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%sudo'
+    line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+    validate: visudo -cf %s
+  become: true

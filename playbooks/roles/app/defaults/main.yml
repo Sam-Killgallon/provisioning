@@ -1,0 +1,8 @@
+---
+deploy_user: deploy
+# app:
+#   name: app_name
+#   db_password: a_password
+#   secret_key_base: a_secret_key
+#   domain_names: ["www.domain.co.uk", "domain.co.uk"]
+#   email: user@domain.co.uk

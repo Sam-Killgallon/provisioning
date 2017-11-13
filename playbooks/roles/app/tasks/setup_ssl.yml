@@ -1,0 +1,43 @@
+---
+- name: Add cerbot repository
+  apt_repository:
+    repo: ppa:certbot/certbot
+    state: present
+  become: true
+
+- name: Install packages for cerbot
+  apt:
+    name: "{{ item }}"
+    update_cache: true
+    cache_valid_time: 3600
+  with_items:
+    - software-properties-common
+    - python-certbot-nginx
+  become: true
+
+- name: Check if certbot has been run before
+  stat:
+    path: "/etc/letsencrypt/live/{{ app.domain_names[0] }}/fullchain.pem"
+  register: cert_file
+  become: true
+  tags: [app]
+
+- name: Set 'use_ssl' fact
+  set_fact:
+    use_ssl: "{{ cert_file.stat.exists }}"
+  tags: [app]
+
+- name: Run certbot
+  command: |
+    certbot --nginx --noninteractive --email {{ app.email }} \
+    --agree-tos --no-eff-email -d {{ app.domain_names|join(" -d ") }}
+  notify: reload nginx
+  when: cert_file.stat.exists == False
+  become: true
+
+- name: Setup cron for auto-renewal
+  cron:
+    name: 'Auto renew https certificate'
+    special_time: monthly
+    job: certbot renew
+  become: true

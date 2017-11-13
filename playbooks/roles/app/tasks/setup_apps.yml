@@ -1,0 +1,48 @@
+---
+- name: Make app root
+  file:
+    path: /var/www/
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    recurse: true
+    mode: 0775
+  become: true
+
+- name: Setup environment variables
+  template:
+    src: environment.j2
+    dest: /etc/environment
+  become: true
+
+- name: Create init script for app
+  template:
+    src: app.init.j2
+    dest: "/etc/systemd/system/{{ app.name }}.service"
+    mode: 0644
+  notify: reload systemd
+  become: true
+
+- name: Start app on boot
+  systemd:
+    name: "{{ app.name }}"
+    enabled: yes
+    state: started
+  become: true
+
+- name: Configure app nginx.conf
+  template:
+    src: app.nginx.conf.j2
+    dest: "/etc/nginx/sites-available/{{ app.name }}"
+  notify: reload nginx
+  become: true
+  tags: [app,ssl]
+
+- name: Symlink files
+  file:
+    src: "/etc/nginx/sites-available/{{ app.name }}"
+    dest: "/etc/nginx/sites-enabled/{{ app.name }}"
+    state: link
+  notify: reload nginx
+  become: true
+  tags: [app]

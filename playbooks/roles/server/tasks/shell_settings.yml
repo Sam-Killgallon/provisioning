@@ -1,0 +1,13 @@
+---
+- name: Link /bin/sh to /bin/bash
+  file:
+    src: /bin/bash
+    dest: /bin/sh
+    state: link
+  become: true
+
+- name: Ensure vim is the default text editor
+  alternatives:
+    name: editor
+    path: /usr/bin/vim
+  become: true

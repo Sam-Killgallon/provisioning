@@ -1,0 +1,39 @@
+---
+- name: Install core packages
+  apt:
+    name: "{{ item }}"
+    update_cache: true
+    cache_valid_time: 3600
+  with_items: "{{ required_core_packages }}"
+  become: true
+
+- name: Deny all ports
+  ufw:
+    policy: deny
+  become: true
+
+- name: Allow access to specific ports
+  ufw:
+    port: "{{ item }}"
+    rule: allow
+    proto: tcp
+  become: true
+  with_items: "{{ allowed_firewall_ports }}"
+
+- name: Enable firewall
+  ufw:
+    state: enabled
+  become: true
+
+- name: Change ssh settings
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regex }}"
+    line: "{{ item.line }}"
+    state: present
+  become: true
+  with_items:
+    - { regex: "^Port ", line: "Port {{ custom_ssh_port }}" }
+    - { regex: "^PasswordAuthentication", line: "PasswordAuthentication no" }
+    - { regex: "^PermitRootLogin", line: "PermitRootLogin no" }
+  notify: restart ssh

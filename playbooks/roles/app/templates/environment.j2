@@ -1,0 +1,5 @@
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"
+
+MYSQL_SOCKET=/var/run/mysqld/mysqld.sock
+{{ app.name|upper }}_DATABASE_PASSWORD={{ app.db_password }}
+SECRET_KEY_BASE={{ app.secret_key_base }}

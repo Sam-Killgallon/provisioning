@@ -1,0 +1,15 @@
+[Unit]
+Description=Puma HTTP Server
+After=network.target
+
+[Service]
+Type=simple
+User={{ deploy_user }}
+WorkingDirectory=/var/www/{{ app.name }}/current
+ExecStart=/bin/bash -lc 'bundle exec puma -C /var/www/{{ app.name }}/shared/puma.rb'
+Restart=always
+PIDFile= /var/www/{{ app.name }}/shared/tmp/pids/puma.pid
+EnvironmentFile=/etc/environment
+
+[Install]
+WantedBy=multi-user.target

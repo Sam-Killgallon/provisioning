@@ -1,0 +1,31 @@
+---
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: latest
+  become: true
+
+- name: Start Nginx
+  service:
+    name: nginx
+    state: started
+  become: true
+
+- name: Remove default nginx page
+  file:
+    dest: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/nginx/sites-enabled/default
+    - /etc/nginx/sites-available/default
+  notify: reload nginx
+  become: true
+
+- name: Configure global nginx.conf
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    regexp: "^user "
+    line: "user {{ deploy_user }};"
+    state: present
+  notify: reload nginx
+  become: true

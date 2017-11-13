@@ -1,0 +1,4 @@
+---
+- include: users.yml
+- include: shell_settings.yml
+- include: network.yml
