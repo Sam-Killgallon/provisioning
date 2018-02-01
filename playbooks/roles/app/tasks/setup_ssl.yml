@@ -17,7 +17,7 @@
 
 - name: Check if certbot has been run before
   stat:
-    path: "/etc/letsencrypt/live/{{ app.domain_names[0] }}/fullchain.pem"
+    path: "/etc/letsencrypt/live/{{ app.primary_domain_name }}/fullchain.pem"
   register: cert_file
   become: true
   tags: [app]
@@ -30,7 +30,10 @@
 - name: Run certbot
   command: |
     certbot --nginx --noninteractive --email {{ app.email }} \
-    --agree-tos --no-eff-email -d {{ app.domain_names|join(" -d ") }}
+    --agree-tos --no-eff-email -d {{ app.primary_domain_name}} \
+    {% for domain in app.alias_domain_names %} \
+    -d {{ domain }} \
+    {% endfor %}
   notify: reload nginx
   when: cert_file.stat.exists == False
   become: true

@@ -4,5 +4,16 @@ deploy_user: deploy
 #   name: app_name
 #   db_password: a_password
 #   secret_key_base: a_secret_key
-#   domain_names: ["www.domain.co.uk", "domain.co.uk"]
+#   primary_domain_name: domain.co.uk
+#   alias_domain_names: ["www.domain.co.uk"]
 #   email: user@domain.co.uk
+
+# You may also want to setup the database config here too
+# mysql_root_password: root_pass
+# mysql_users:
+#   - name: my_user
+#     password: a_password
+#     priv: "my_database.*:ALL"
+
+# mysql_databases:
+#   - name: my_database

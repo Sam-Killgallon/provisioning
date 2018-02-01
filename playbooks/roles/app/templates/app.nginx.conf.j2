@@ -3,8 +3,33 @@ upstream puma {
 }
 
 server {
-  listen 80 default_server deferred;
-  server_name {{ app.domain_names|join(" ") }};
+{% if use_ssl|default(false) %}
+  # Handle HTTP versions of primary and aliases
+  server_name {{ app.primary_domain_name }} {{ app.alias_domain_names|join(" ") }};
+  return 301 https://{{ app.primary_domain_name }}$request_uri;
+{% else %}
+  # Handle HTTP versions of aliases (Not primary as this could keep redirecting back to itself?)
+  server_name {{ app.alias_domain_names|join(" ") }};
+  return 301 http://{{ app.primary_domain_name }}$request_uri;
+{% endif %}
+}
+
+
+{% if use_ssl|default(false) %}
+# Handle HTTPS versions of aliases
+server {
+  listen 443 ssl;
+  ssl_certificate /etc/letsencrypt/live/{{ app.primary_domain_name }}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/{{ app.primary_domain_name }}/privkey.pem;
+  include /etc/letsencrypt/options-ssl-nginx.conf;
+  ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+  server_name {{ app.alias_domain_names|join(" ") }};
+  return 301 https://{{ app.primary_domain_name }}$request_uri;
+}
+{% endif %}
+
+server {
+  server_name {{ app.primary_domain_name }};
 
   root /var/www/{{ app.name }}/current/public;
   access_log /var/www/{{ app.name }}/current/log/nginx.access.log;
@@ -16,7 +41,7 @@ server {
     add_header Cache-Control public;
   }
 
-  try_files $uri/index.html $uri @puma;
+  try_files $uri @puma;
   location @puma {
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header Host $http_host;
@@ -30,14 +55,14 @@ server {
   keepalive_timeout 10;
 
 {% if use_ssl|default(false) %}
+  # Handle HTTPS version of primary
   listen 443 ssl;
-  ssl_certificate /etc/letsencrypt/live/{{ app.domain_names[0] }}/fullchain.pem;
-  ssl_certificate_key /etc/letsencrypt/live/{{ app.domain_names[0] }}/privkey.pem;
+  ssl_certificate /etc/letsencrypt/live/{{ app.primary_domain_name }}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/{{ app.primary_domain_name }}/privkey.pem;
   include /etc/letsencrypt/options-ssl-nginx.conf;
   ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
-
-  if ($scheme != "https") {
-      return 301 https://$host$request_uri;
-  }
+{% else %}
+  # Handle HTTP version of primary
+  listen 80;
 {% endif %}
 }
