@@ -1,4 +1,9 @@
 ---
+- name: Add group
+  group:
+    name: "{{ deploy_user }}"
+  become: true
+
 - name: Add users
   user:
     name: "{{ item }}"
@@ -23,4 +28,20 @@
     regexp: '^%sudo'
     line: '%sudo ALL=(ALL) NOPASSWD: ALL'
     validate: visudo -cf %s
+  become: true
+
+# https://askubuntu.com/questions/614534/disable-authentication-prompts-in-15-04/614537#614537
+# Prevent asking to authenticate for users in the sudo group when using
+# commands like systemctl
+- name: Allow passwordless sudo for polkit
+  template:
+    src: nopassword.pkla.j2
+    dest: /etc/polkit-1/localauthority/50-local.d/99-nopassword.pkla
+  become: true
+
+- name: Remove default ubuntu user
+  user:
+    name: ubuntu
+    state: absent
+    remove: true
   become: true

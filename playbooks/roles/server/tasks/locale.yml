@@ -1,0 +1,17 @@
+- locale_gen:
+    name: "{{ default_locale }}"
+    state: present
+  become: true
+
+- name: Set default locale via systemd
+  shell: "localectl set-locale LANG={{ default_locale }}"
+  become: true
+  when: ansible_env["LANG"] != default_locale
+
+- name: Set default locale via file
+  lineinfile:
+    path: /etc/default/locale
+    regexp: "LANG=.*"
+    line: "LANG={{ default_locale }}"
+    state: present
+  become: true

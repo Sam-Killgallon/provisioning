@@ -14,3 +14,4 @@ allowed_firewall_ports:
 deploy_user: &deploy_user deploy
 ssh_users:
   - *deploy_user
+default_locale: en_GB.UTF-8

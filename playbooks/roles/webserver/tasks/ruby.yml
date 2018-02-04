@@ -1,28 +1,15 @@
 ---
-- name: Add brightbox source for ruby
-  apt_repository:
-    repo: 'ppa:brightbox/ruby-ng'
-    update_cache: true
-  become: true
-
-- name: Install ruby2.4
-  apt:
-    name: ruby2.4
-    update_cache: true
-  become: true
-
 - name: Install ruby dev packages
   apt:
     name: "{{ item }}"
     update_cache: true
   with_items:
     - build-essential
-    - ruby2.4-dev
     - libmysqlclient-dev
   become: true
 
 - name: Install bundler
   gem:
     name: bundler
-    version: 1.16.0
+    version: 1.16.1
   become: true

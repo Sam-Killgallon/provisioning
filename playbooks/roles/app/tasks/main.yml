@@ -1,4 +1,4 @@
 ---
-- include: setup_ssl.yml
+- import_tasks: setup_ssl.yml
   tags: [ssl]
-- include: setup_apps.yml
+- import_tasks: setup_apps.yml
