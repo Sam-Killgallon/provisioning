@@ -7,11 +7,6 @@
   with_items: "{{ required_core_packages }}"
   become: true
 
-- name: Deny all ports
-  ufw:
-    policy: deny
-  become: true
-
 - name: Allow access to specific ports
   ufw:
     port: "{{ item }}"
@@ -19,6 +14,15 @@
     proto: tcp
   become: true
   with_items: "{{ allowed_firewall_ports }}"
+
+- name: Deny any recently changed ports
+  ufw:
+    port: "{{ item }}"
+    rule: deny
+    proto: tcp
+  become: true
+  with_items: "{{ recently_disabled_firewall_ports }}"
+
 
 - name: Enable firewall
   ufw:

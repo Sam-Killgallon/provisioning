@@ -11,6 +11,7 @@ allowed_firewall_ports:
   - 80
   - 443
   - *custom_ssh_port
+recently_disabled_firewall_ports: []
 deploy_user: &deploy_user deploy
 ssh_users:
   - *deploy_user
