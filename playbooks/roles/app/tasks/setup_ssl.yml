@@ -22,11 +22,6 @@
   become: true
   tags: [app]
 
-- name: Set 'use_ssl' fact
-  set_fact:
-    use_ssl: "{{ cert_file.stat.exists }}"
-  tags: [app]
-
 - name: Run certbot
   command: |
     certbot --nginx --noninteractive --email {{ app.email }} \
@@ -37,6 +32,11 @@
   notify: reload nginx
   when: cert_file.stat.exists == False
   become: true
+
+- name: Set 'use_ssl' fact
+  set_fact:
+    use_ssl: "{{ cert_file.stat.exists }}"
+  tags: [app]
 
 - name: Setup cron for auto-renewal
   cron:
